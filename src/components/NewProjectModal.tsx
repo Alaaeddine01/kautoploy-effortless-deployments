@@ -17,6 +17,7 @@ const NewProjectModal = ({ open, onOpenChange, onProjectCreated }: NewProjectMod
   const [name, setName] = useState('');
   const [gitUrl, setGitUrl] = useState('');
   const [framework, setFramework] = useState('');
+  const [githubToken, setGithubToken] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -40,12 +41,14 @@ const NewProjectModal = ({ open, onOpenChange, onProjectCreated }: NewProjectMod
         name,
         git_url: gitUrl,
         framework,
+        github_token: githubToken || null,
       });
 
       toast.success('Project created successfully!');
       setName('');
       setGitUrl('');
       setFramework('');
+      setGithubToken('');
       onOpenChange(false);
       onProjectCreated();
     } catch (error) {
@@ -88,6 +91,21 @@ const NewProjectModal = ({ open, onOpenChange, onProjectCreated }: NewProjectMod
               onChange={(e) => setGitUrl(e.target.value)}
               disabled={isLoading}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="githubToken">GitHub Personal Access Token (PAT)</Label>
+            <Input
+              id="githubToken"
+              type="password"
+              placeholder="ghp_..."
+              value={githubToken}
+              onChange={(e) => setGithubToken(e.target.value)}
+              disabled={isLoading}
+            />
+            <p className="text-xs text-muted-foreground">
+              Optional. Provide this to automatically create the Webhook in your repository.
+            </p>
           </div>
 
           <div className="space-y-2">
