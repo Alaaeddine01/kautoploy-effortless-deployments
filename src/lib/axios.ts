@@ -1,10 +1,10 @@
 import axios from 'axios';
 
  //const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
-const baseURL = "https://api.kautoploy.com"
+//const baseURL = "https://api.kautoploy.com" || 'http://localhost:8000/api/v1';
 
 const axiosInstance = axios.create({
-  baseURL: baseURL,
+  baseURL: 'https://api.kautoploy.com/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
