@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from '@/lib/axios';
-import { Loader2 } from 'lucide-react';
+import { Loader2, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface LogTerminalProps {
   runName: string;
@@ -26,6 +27,20 @@ const LogTerminal = ({ runName, status }: LogTerminalProps) => {
       console.error('Failed to fetch logs:', error);
       setLogs('Failed to load logs...');
     }
+  };
+
+  const handleDownload = () => {
+    if (!logs) return;
+    
+    const blob = new Blob([logs], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `build-logs-${runName}-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   useEffect(() => {
@@ -66,18 +81,31 @@ const LogTerminal = ({ runName, status }: LogTerminalProps) => {
           <span className="text-xs font-medium text-slate-400 ml-2">Build Output</span>
         </div>
         
-        {/* Status Indicator */}
-        {isLive ? (
-          <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-md">
-            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
-            <span className="text-xs font-medium text-emerald-400">Live</span>
-          </div>
-        ) : (
-          <div className="flex items-center gap-2 px-2.5 py-1 bg-slate-700/30 border border-slate-700 rounded-md">
-            <div className="w-2 h-2 rounded-full bg-slate-400"></div>
-            <span className="text-xs font-medium text-slate-400">Finished</span>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          {/* Download Button */}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleDownload}
+            disabled={!logs}
+            className="h-7 px-2 text-slate-400 hover:text-slate-200 hover:bg-slate-800/50"
+          >
+            <Download className="h-3.5 w-3.5" />
+          </Button>
+          
+          {/* Status Indicator */}
+          {isLive ? (
+            <div className="flex items-center gap-2 px-2.5 py-1 bg-emerald-500/10 border border-emerald-500/30 rounded-md">
+              <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
+              <span className="text-xs font-medium text-emerald-400">Live</span>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 px-2.5 py-1 bg-slate-700/30 border border-slate-700 rounded-md">
+              <div className="w-2 h-2 rounded-full bg-slate-400"></div>
+              <span className="text-xs font-medium text-slate-400">Finished</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Terminal Content */}
