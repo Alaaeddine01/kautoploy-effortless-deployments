@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ExternalLink, Rocket, RefreshCw, Loader2, CheckCircle2, XCircle } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { ExternalLink, Rocket, RefreshCw, Loader2, CheckCircle2, XCircle, Terminal } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import axios from '@/lib/axios';
 import { toast } from 'sonner';
+import LogTerminal from './LogTerminal';
 
 interface Project {
   id: number;
@@ -13,6 +16,7 @@ interface Project {
   framework: string;
   deployed_url: string | null;
   last_build_status: string;
+  last_pipeline_run_name?: string;
 }
 
 interface ProjectCardProps {
@@ -68,6 +72,7 @@ const getFrameworkLabel = (framework: string) => {
 };
 
 const ProjectCard = ({ project, onProjectUpdated }: ProjectCardProps) => {
+  const [isLogsOpen, setIsLogsOpen] = useState(false);
   const statusConfig = getStatusConfig(project.last_build_status);
   const StatusIcon = statusConfig.icon;
   
@@ -125,9 +130,21 @@ const ProjectCard = ({ project, onProjectUpdated }: ProjectCardProps) => {
             </Button>
           )}
           
+          {project.last_pipeline_run_name && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2"
+              onClick={() => setIsLogsOpen(true)}
+            >
+              <Terminal className="h-4 w-4" />
+              View Logs
+            </Button>
+          )}
+          
           <Button
             size="sm"
-            className={cn("gap-2", isDeployed ? "flex-1" : "w-full")}
+            className={cn("gap-2", isDeployed || project.last_pipeline_run_name ? "flex-1" : "w-full")}
             onClick={handleDeploy}
           >
             {isNew ? (
@@ -144,6 +161,21 @@ const ProjectCard = ({ project, onProjectUpdated }: ProjectCardProps) => {
           </Button>
         </div>
       </CardContent>
+
+      {/* Logs Dialog */}
+      <Dialog open={isLogsOpen} onOpenChange={setIsLogsOpen}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>Build Logs: {project.last_pipeline_run_name}</DialogTitle>
+          </DialogHeader>
+          {project.last_pipeline_run_name && (
+            <LogTerminal 
+              runName={project.last_pipeline_run_name} 
+              status={project.last_build_status} 
+            />
+          )}
+        </DialogContent>
+      </Dialog>
     </Card>
   );
 };
