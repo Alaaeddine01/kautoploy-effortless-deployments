@@ -14,6 +14,7 @@ interface Project {
   framework: string;
   deployed_url: string | null;
   last_build_status: string;
+  last_pipeline_run_name?: string;
 }
 
 const Dashboard = () => {
