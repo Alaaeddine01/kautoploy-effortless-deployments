@@ -2,6 +2,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { LogOut, Plus, Rocket } from 'lucide-react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface NavbarProps {
   onNewProject?: () => void;
@@ -27,6 +28,7 @@ const Navbar = ({ onNewProject }: NavbarProps) => {
         </Link>
 
         <div className="flex items-center gap-3">
+          <ThemeToggle />
           {isAuthenticated ? (
             <>
               {onNewProject && (
