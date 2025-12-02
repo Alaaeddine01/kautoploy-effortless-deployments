@@ -3,11 +3,12 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { ExternalLink, Rocket, RefreshCw, Loader2, CheckCircle2, XCircle, Terminal } from 'lucide-react';
+import { ExternalLink, Rocket, RefreshCw, Loader2, CheckCircle2, XCircle, Terminal, ScrollText } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import axios from '@/lib/axios';
 import { toast } from 'sonner';
 import LogTerminal from './LogTerminal';
+import BuildHistorySheet from './BuildHistorySheet';
 
 interface Project {
   id: number;
@@ -73,6 +74,7 @@ const getFrameworkLabel = (framework: string) => {
 
 const ProjectCard = ({ project, onProjectUpdated }: ProjectCardProps) => {
   const [isLogsOpen, setIsLogsOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const statusConfig = getStatusConfig(project.last_build_status);
   const StatusIcon = statusConfig.icon;
   
@@ -115,12 +117,12 @@ const ProjectCard = ({ project, onProjectUpdated }: ProjectCardProps) => {
           </div>
         </div>
 
-        <div className="flex gap-2 pt-2">
+        <div className="flex flex-wrap gap-2 pt-2">
           {isDeployed && project.deployed_url && (
             <Button
               variant="outline"
               size="sm"
-              className="flex-1 gap-2"
+              className="flex-1 min-w-[120px] gap-2"
               asChild
             >
               <a href={project.deployed_url} target="_blank" rel="noopener noreferrer">
@@ -130,21 +132,19 @@ const ProjectCard = ({ project, onProjectUpdated }: ProjectCardProps) => {
             </Button>
           )}
           
-          {project.last_pipeline_run_name && (
-            <Button
-              variant="outline"
-              size="sm"
-              className="gap-2"
-              onClick={() => setIsLogsOpen(true)}
-            >
-              <Terminal className="h-4 w-4" />
-              View Logs
-            </Button>
-          )}
+          <Button
+            variant="outline"
+            size="sm"
+            className="gap-2"
+            onClick={() => setIsHistoryOpen(true)}
+          >
+            <ScrollText className="h-4 w-4" />
+            History & Logs
+          </Button>
           
           <Button
             size="sm"
-            className={cn("gap-2", isDeployed || project.last_pipeline_run_name ? "flex-1" : "w-full")}
+            className={cn("gap-2 flex-1 min-w-[120px]")}
             onClick={handleDeploy}
           >
             {isNew ? (
@@ -162,20 +162,13 @@ const ProjectCard = ({ project, onProjectUpdated }: ProjectCardProps) => {
         </div>
       </CardContent>
 
-      {/* Logs Dialog */}
-      <Dialog open={isLogsOpen} onOpenChange={setIsLogsOpen}>
-        <DialogContent className="max-w-4xl">
-          <DialogHeader>
-            <DialogTitle>Build Logs: {project.last_pipeline_run_name}</DialogTitle>
-          </DialogHeader>
-          {project.last_pipeline_run_name && (
-            <LogTerminal 
-              runName={project.last_pipeline_run_name} 
-              status={project.last_build_status} 
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Build History Sheet */}
+      <BuildHistorySheet
+        projectId={project.id}
+        projectName={project.name}
+        open={isHistoryOpen}
+        onOpenChange={setIsHistoryOpen}
+      />
     </Card>
   );
 };
