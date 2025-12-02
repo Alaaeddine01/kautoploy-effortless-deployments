@@ -117,7 +117,7 @@ const NewProjectModal = ({ open, onOpenChange, onProjectCreated }: NewProjectMod
               <SelectContent className="bg-popover border-border">
                 <SelectItem value="react">React / Static</SelectItem>
                 <SelectItem value="springboot">Spring Boot</SelectItem>
-                <SelectItem value="fastapi">FastAPI</SelectItem>
+                <SelectItem value="fastapi">Django</SelectItem>
               </SelectContent>
             </Select>
           </div>

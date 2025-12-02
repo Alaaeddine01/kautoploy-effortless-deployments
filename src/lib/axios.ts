@@ -4,7 +4,8 @@ import axios from 'axios';
 //const baseURL = "https://api.kautoploy.com" || 'http://localhost:8000/api/v1';
 
 const axiosInstance = axios.create({
-  baseURL: 'https://api.kautoploy.com/api/v1',
+  //baseURL : "/api/v1",
+  baseURL: 'http://localhost:8000/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },

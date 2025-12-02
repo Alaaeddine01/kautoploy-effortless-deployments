@@ -66,7 +66,7 @@ const getFrameworkLabel = (framework: string) => {
   const map: Record<string, string> = {
     react: 'React',
     springboot: 'Spring Boot',
-    fastapi: 'FastAPI',
+    fastapi: 'Django',
   };
   return map[framework] || framework;
 };
