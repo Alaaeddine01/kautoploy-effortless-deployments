@@ -5,18 +5,22 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Rocket } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Rocket, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const { register, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
     if (!email || !password || !confirmPassword) {
       toast.error('Please fill in all fields');
@@ -32,10 +36,16 @@ const Register = () => {
       await register(email, password);
       toast.success('Account created successfully!');
       navigate('/dashboard');
-    } catch (error) {
-      toast.error('Registration failed. Please try again.');
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 400) {
+        setError('This email is already in use.');
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     }
   };
+
+  const hasError = !!error;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -53,6 +63,12 @@ const Register = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -62,6 +78,7 @@ const Register = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
+                className={hasError ? 'border-destructive focus-visible:ring-destructive' : ''}
               />
             </div>
             <div className="space-y-2">
@@ -73,6 +90,7 @@ const Register = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
+                className={hasError ? 'border-destructive focus-visible:ring-destructive' : ''}
               />
             </div>
             <div className="space-y-2">
@@ -84,6 +102,7 @@ const Register = () => {
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
                 disabled={isLoading}
+                className={hasError ? 'border-destructive focus-visible:ring-destructive' : ''}
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>

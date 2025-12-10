@@ -1,7 +1,7 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
-import { LogOut, Plus, Rocket } from 'lucide-react';
+import { LogOut, Plus, Rocket, User } from 'lucide-react';
 import { ThemeToggle } from '@/components/ThemeToggle';
 
 interface NavbarProps {
@@ -17,6 +17,17 @@ const Navbar = ({ onNewProject }: NavbarProps) => {
     navigate('/login');
   };
 
+  // Get username from stored email (part before @)
+  const getUserDisplayName = () => {
+    const email = localStorage.getItem('user_email');
+    if (email) {
+      return email.split('@')[0];
+    }
+    return null;
+  };
+
+  const displayName = getUserDisplayName();
+
   return (
     <nav className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -31,6 +42,12 @@ const Navbar = ({ onNewProject }: NavbarProps) => {
           <ThemeToggle />
           {isAuthenticated ? (
             <>
+              {displayName && (
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-muted/50 text-sm">
+                  <User className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-foreground font-medium">{displayName}</span>
+                </div>
+              )}
               {onNewProject && (
                 <Button onClick={onNewProject} size="sm" className="gap-2">
                   <Plus className="h-4 w-4" />
