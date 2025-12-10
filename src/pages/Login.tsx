@@ -5,17 +5,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Rocket } from 'lucide-react';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Rocket, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import axios from 'axios';
 
 const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
   const { login, isLoading } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
     if (!email || !password) {
       toast.error('Please fill in all fields');
@@ -26,10 +30,16 @@ const Login = () => {
       await login(email, password);
       toast.success('Welcome back!');
       navigate('/dashboard');
-    } catch (error) {
-      toast.error('Login failed. Please try again.');
+    } catch (err) {
+      if (axios.isAxiosError(err) && err.response?.status === 401) {
+        setError('Incorrect email or password.');
+      } else {
+        setError('Login failed. Please try again.');
+      }
     }
   };
+
+  const hasError = !!error;
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center p-4">
@@ -47,6 +57,12 @@ const Login = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
+            {error && (
+              <Alert variant="destructive">
+                <AlertCircle className="h-4 w-4" />
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
               <Input
@@ -56,6 +72,7 @@ const Login = () => {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 disabled={isLoading}
+                className={hasError ? 'border-destructive focus-visible:ring-destructive' : ''}
               />
             </div>
             <div className="space-y-2">
@@ -67,6 +84,7 @@ const Login = () => {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 disabled={isLoading}
+                className={hasError ? 'border-destructive focus-visible:ring-destructive' : ''}
               />
             </div>
             <Button type="submit" className="w-full" disabled={isLoading}>
