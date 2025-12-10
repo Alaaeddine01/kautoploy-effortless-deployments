@@ -16,7 +16,9 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
   }
 
-  if (!isAuthenticated) {
+  // Check both context state and localStorage for token
+  const hasToken = localStorage.getItem('access_token');
+  if (!isAuthenticated && !hasToken) {
     return <Navigate to="/login" replace />;
   }
 

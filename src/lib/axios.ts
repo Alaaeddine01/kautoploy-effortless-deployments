@@ -1,23 +1,32 @@
 import axios from 'axios';
 
- //const baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api/v1';
-//const baseURL = "https://api.kautoploy.com" || 'http://localhost:8000/api/v1';
-
 const axiosInstance = axios.create({
-  //baseURL : "/api/v1",
   baseURL: 'http://localhost:8000/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
 });
 
-// Add auth token to requests if available
+// Request interceptor - Add auth token to requests
 axiosInstance.interceptors.request.use((config) => {
-  const token = localStorage.getItem('auth_token');
+  const token = localStorage.getItem('access_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+// Response interceptor - Handle 401 Unauthorized
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('user_email');
+      window.location.href = '/login';
+    }
+    return Promise.reject(error);
+  }
+);
 
 export default axiosInstance;
