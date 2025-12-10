@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import axios from '@/lib/axios';
 
 interface AuthContextType {
   isAuthenticated: boolean;
@@ -15,40 +16,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Check if user has a token in localStorage
-    const token = localStorage.getItem('auth_token');
+    const token = localStorage.getItem('access_token');
     setIsAuthenticated(!!token);
     setIsLoading(false);
   }, []);
 
   const login = async (email: string, password: string) => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock authentication - accept any email/password
-    const mockToken = `mock_token_${Date.now()}`;
-    localStorage.setItem('auth_token', mockToken);
-    localStorage.setItem('user_email', email);
-    setIsAuthenticated(true);
-    setIsLoading(false);
+    try {
+      // FastAPI OAuth2 expects form-urlencoded with username/password fields
+      const params = new URLSearchParams();
+      params.append('username', email);
+      params.append('password', password);
+
+      const response = await axios.post('/auth/token', params, {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+        },
+      });
+
+      const { access_token } = response.data;
+      localStorage.setItem('access_token', access_token);
+      localStorage.setItem('user_email', email);
+      setIsAuthenticated(true);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const register = async (email: string, password: string) => {
     setIsLoading(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    // Mock registration
-    const mockToken = `mock_token_${Date.now()}`;
-    localStorage.setItem('auth_token', mockToken);
-    localStorage.setItem('user_email', email);
-    setIsAuthenticated(true);
-    setIsLoading(false);
+    try {
+      // Register with JSON payload
+      await axios.post('/auth/register', { email, password });
+
+      // Auto-login after successful registration
+      await login(email, password);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const logout = () => {
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem('access_token');
     localStorage.removeItem('user_email');
     setIsAuthenticated(false);
   };
